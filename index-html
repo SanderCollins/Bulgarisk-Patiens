@@ -1,1 +1,25 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="inputDiv">
+        <input type="input" placeholder="1-20, 1-20, 1-20..." autocomplete="off" id="carddistrubution" oninput="getVal(true)"/>
+        <button onclick="getVal(false)" id="button" class="submit-button">Submit</button>
+        <button onclick="clearBoard()" id="button" class="clear-button">Clear</button>
+        <button onclick="stats()" id="button" class="stats-button">Stats</button>
+        <button onclick="play()" id="button" class="play-button">Play</button>
+    </div>
+    <div>
+        <p id="text"></p>
+    </div>
+    <div id="flex-container-parent"></div>
+</body>
+</html>

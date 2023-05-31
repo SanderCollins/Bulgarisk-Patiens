@@ -1,80 +1,129 @@
+//Makes the first global variables
+var currentCardDistribution = [];
+var numberOfCycles = 0;
+var cardDistributionArray = [];
+var lastcardDistribution = [];
+var currentStackArray = [];
+var stopSimulate = false;
+var totalNumberOfCards = 0;
 
-var currentCardDistribution = []
+//Function to sort array in descending order
+function numberSort(a, b) {
+    return a - b;
+};
 
-function addVariables(cardlist) {
+//Function to calculate and send variables to CSS
+function addCssVariables(cardlist) {
+    // Adds the newly submitted cards to the current card distribution
     for (let i = 0; i < cardlist.length; i++) {
-        currentCardDistribution.push(cardlist[i])
+        currentCardDistribution.push(cardlist[i]);
     }
-    currentCardDistribution.sort()
+
+    // Gets width of each cardstack & Gets the total number of cards
     var root = document.querySelector(":root");
-    let itemWidth = `${100/(document.getElementsByClassName("cardstack").length)}%`
-    let numberOfCards = (document.getElementsByClassName("img").length)
+    let itemWidth = `${100/(document.getElementsByClassName("cardstack").length)}%`;
+    let numberOfCards = (document.getElementsByClassName("img").length);
+
+    // Gets a number of when to change cardstack size, i.e after 8 stacks.
     if (document.getElementsByClassName("cardstack").length >= 8){
-        var numberOfStacksMargin = (document.getElementsByClassName("cardstack").length - 8)
+        var numberOfStacksMargin = (document.getElementsByClassName("cardstack").length - 8);
     }
     else{
-        var numberOfStacksMargin = 0
+        var numberOfStacksMargin = 0;
     }
-    let numberOfStacks = (document.getElementsByClassName("cardstack").length)
-    root.style.setProperty("--item-width", itemWidth)
-    root.style.setProperty("--number-of-stacks", numberOfStacks)
-    root.style.setProperty("--number-of-stacks-margin", numberOfStacksMargin)
-    root.style.setProperty("--number-of-cards", numberOfCards)}
 
-function getVal(check) {
-    var cardDistribution = document.getElementById('carddistrubution').value;    
+    //Sets variables for css to grab & creates a variable for number of cardstacks
+    let numberOfStacks = (document.getElementsByClassName("cardstack").length);
+    root.style.setProperty("--item-width", itemWidth);
+    root.style.setProperty("--number-of-stacks", numberOfStacks);
+    root.style.setProperty("--number-of-stacks-margin", numberOfStacksMargin);
+    root.style.setProperty("--number-of-cards", numberOfCards)};
+
+//Function to filter the inputed values and fix cards and/or add cards 
+//Fix cards if only the input is chaanged & Add cards if "Submit" button is pressed.
+function getValues(check) {
+    //Get the requested card distribution
+    var cardDistribution = document.getElementById('carddistrubution').value;  
+    
+    //Filter the requested card distribution
     const re = /\d+/g;
     values = cardDistribution.match(re);
-    try {var values1 = values.map(Number)}
-    catch{values1 = []}
-    values1.reverse();
+    try {var values = values.map(Number)}
+    catch{values = []}
+
+    //Sort values
+    values.sort(numberSort);
+
+    //Fix cards if checked else fix & add cards
     if (check == false){
-        addCards(fixcards(values1))
+        addCards(fixcards(values));
     } else {
-        fixcards(values1)
+        fixcards(values);
     }
+    //Update game variables
+    updateGameVariables();
 }
 
+//Function to check and fix (cardstacks to be added) if cards over 52 & give error messages
 function fixcards(values){
-    number = 0
-    var cards = 0
-    maxlimittext = ""
-    stacklimittext = ""
-    maxstacklimittext = ""
-    let totalNumberOfCards = (document.getElementsByClassName("img").length)
+    //Declare variables
+    number = 0;
+    var cards = 0;
+    maxlimittext = "";
+    let totalNumberOfCards = (document.getElementsByClassName("img").length);
 
+    //Loop thought every cardstack to be added
     for (let i = 0; i <= values.length; i++){
-        cards += values[i]
+        //Get number of cards to be added
+        cards += values[i];
         if (values[i] == 0){
-            values.splice(i, 1)
-            i-=1
+            values.splice(i, 1);
+            i -= 1;
         }
+        //Check if cardlimit is reached
         if (totalNumberOfCards + cards > 52){
-            maxlimittext = "Card limit reached: (52)" 
-            let overNumber = (cards+totalNumberOfCards)-52
-            values[i] = values[i] - overNumber
-            values = values.slice(0, i+1)
-            document.getElementById("button").textContent = "Auto fix & Submit"
+
+            //Give error message
+            maxlimittext = "Card limit reached: (52)";
+
+            //Get how many cards are allowed to be added 
+            let overNumber = (cards + totalNumberOfCards) - 52;
+            values[i] = values[i] - overNumber;
+
+            //Removes rest of cardstacks to be added
+            values = values.slice(0, i + 1);
+
+            //Set button text to show "Auto fix and submit"
+            document.getElementById("button").textContent = "Auto fix & Submit";
             break
 
         } else if (totalNumberOfCards < 52){
             document.getElementById('button').textContent = "Submit";  
         }
     } 
-    document.getElementById("text").innerHTML = `${stacklimittext+" "+maxlimittext+" "+maxstacklimittext}`;
+    //Update error message if there is one
+    document.getElementById("text").innerHTML = `${maxlimittext}`;
+
+    //If values list is 0, update error message to full, since there is no room for more cards
     if (values[0] == 0 && values.length == 1){
-        document.getElementById('button').textContent = "- Full -"
+        document.getElementById('button').textContent = "- Full -";
         return
-    } else {return [values, cards]}
+    } else {return [values, cards];}
 }
 
-function addCards(values) {
-    let cards = values[1]
-    values = values[0]
+function addCards(returned_list) {
+    //Get cards from returned list & Get values from returned list
+    let cards = returned_list[1];
+    let values = returned_list[0];
+
+    //Reverse values to add them correcly, (Loop adds them from botton to top)
+    values.reverse();
+
+    //Create container for cardstacks if there is none
     if (document.getElementsByClassName("flex-container").length == 0) {
         var flexContainer = document.createElement('div');
-        flexContainer.className = "flex-container"
-        document.getElementById("flex-container-parent").appendChild(flexContainer)
+        flexContainer.className = "flex-container";
+        document.getElementById("flex-container-parent").appendChild(flexContainer);
     }
 
     for (let i = 0; i < values.length; i++){
@@ -83,77 +132,148 @@ function addCards(values) {
         cardstackDiv.className = 'cardstack';
 
 
-        // Create the img element with src, alt, and class attributes
-
+        // Create the img element with src, alt, and class attributes, (The cards)
         for (j = 0; j < values[i]; j++) {
             var imgElement = document.createElement('img');
             imgElement.src = 'BaksidaKort.png';
-            imgElement.className = "img"
-            cardstackDiv.appendChild(imgElement)
+            imgElement.className = "img";
+            cardstackDiv.appendChild(imgElement);
         }
 
-        // Return the created cardstack div element
+        // Adds the cardstackdiv to the flex container as long as there is space
         if (document.querySelector(".flex-container").children.length < 52) {
-        var flexContainer = document.querySelector(".flex-container")
-        flexContainer.appendChild(cardstackDiv)
+        var flexContainer = document.querySelector(".flex-container");
+        flexContainer.appendChild(cardstackDiv);
         }
     }
-    totalNumberOfCards = document.getElementsByClassName("img").length
+    //Update totalNumberOfCards
+    totalNumberOfCards = document.getElementsByClassName("img").length;
+
+    //Update submit button text
     if (totalNumberOfCards >= 52) {
-        document.getElementById('button').textContent = "- Full -"
+        document.getElementById('button').textContent = "- Full -";
     } else if (totalNumberOfCards+cards > 52) {
-        document.getElementById('button').textContent = "Auto fix & Submit"
+        document.getElementById('button').textContent = "Auto fix & Submit";
     } else {
-        document.getElementById('button').textContent = "Submit"
+        document.getElementById('button').textContent = "Submit";
     }
-    addVariables(values)
+    //Add css variables and continue script with original values (Reveresed)
+    addCssVariables(values.reverse());
 }
 
+//Function to clear board
 function clearBoard() {
-    document.getElementsByClassName("flex-container")[0].remove()
-    document.getElementById("text").innerHTML = ""
-    document.getElementById('button').textContent = "Submit"
+    //Remove parent to all cardstacks and change button text
+    document.getElementsByClassName("flex-container")[0].remove();
+    document.getElementById("text").innerHTML = "";
+    document.getElementById('button').textContent = "Submit";
+    
+    //Update the game variables
+    currentCardDistribution = [];
+    updateGameVariables();
 }
 
-numberOfCycles = 0
-lastcardDistribution = currentCardDistribution
-cardDistributionArray = [currentCardDistribution]
-function play() {
+//Use variables from code but duplicate them to not cause errors in css when running Play
+function updateGameVariables() {
+    stopSimulate = false;
+    numberOfCycles = 0;
+    cardDistributionArray = [currentCardDistribution];
+    lastcardDistribution = currentCardDistribution;
+    currentStackArray = currentCardDistribution;
+}
+
+//Calculate how the next card distribution
+function calculateNextStackArray() {
+    //Intruduce a returnstatement to be returned at the end of function
+    let returnStatement = ""
+
+    //Return "stop" if stopSimulate is true, to prevent calculations and logs
+    if (stopSimulate == true) {
+        return "stop";
+    }
+
+    //Check if cycles are over 25, and give error message
+    if (numberOfCycles >= 25){
+        console.log("Out of game cycles, lost at 25 cycles");
+        return "stop"
+    }
+
     numberOfCycles += 1
-    currentCardDistribution = currentCardDistribution.map(item => {
-        return item -= 1 })
+
+    //Remove on card from all stacks
+    currentStackArray = currentStackArray.map(item => {
+        return item -= 1 });
     
-    addedstack = currentCardDistribution.length
-    currentCardDistribution = currentCardDistribution.filter(function(value, index){
-        return value > 0
+    //Make new stack
+    addedstack = currentStackArray.length
+
+    //Filter out all stacks that has 0 or less cards
+    currentStackArray = currentStackArray.filter(function(value, index){
+        return value > 0;
     })
-    currentCardDistribution.push(addedstack)
 
-    console.log(currentCardDistribution)
-
-
-    if (currentCardDistribution.toString() == lastcardDistribution.toString()) {
-        console.log(`You won! after ${numberOfCycles} cycles`)
-        numberOfCycles = 0
+    //If there are no stacks then return
+    if (currentStackArray.length == 0) {
+        updateGameVariables();
+        return "stop";
     }
-    lastcardDistribution = currentCardDistribution
 
-    stringCurrentCardDistribution = currentCardDistribution.map(item => {
-        return item.toString() 
+    //Add the new stack to the new carddistribution
+    currentStackArray.push(addedstack);
+    currentStackArray.sort(numberSort);
+
+    //Log the current stack array
+    console.log(currentStackArray);
+
+    //Make an Array of all card distrubution that have been in (string), to easier compare it later with current distribution
+    stringCardDistributionArray = cardDistributionArray.map(item => {
+        return item.toString() ;
     })
-    if (stringCurrentCardDistribution.includes(currentCardDistribution.toString)){
-        console.log(`You Lost! after ${numberOfCycles} cycles`)
+
+    //If the last card distribution is same as now, the player wins
+    if (currentStackArray.toString() == lastcardDistribution.toString()) {
+        console.log(`You won! after ${numberOfCycles} cycles`);
+        stopSimulate = true;
+        numberOfCycles = 0;
+        returnStatement = "stop";
     }
-    
-    cardDistributionArray.push(currentCardDistribution)
+
+    //If the current distrubution is in the array, it has occured before and a pattern i recognized which mean the player have lost.
+    else if (stringCardDistributionArray.includes(currentStackArray.toString() || noCards == true)) {
+        console.log(`You Lost! after ${numberOfCycles} cycles`);
+        stopSimulate = true;
+        returnStatement = "stop";
+    }
+    //Add current distrubution to the array & update lastCardDistribution
+    cardDistributionArray.push(currentStackArray);
+    lastcardDistribution = currentStackArray;
+
+    //Remove the parent to all stacks, update board with the new card distribution
+    document.querySelector(".flex-container").remove();
+    addCards([currentStackArray, [0]]);
+
+    //If it returned 
+    return returnStatement;
 }
 
+//If the right arrow is pressed, only play one gamecycle
+document.onkeydown = function (e) {
+    if (e.key == "ArrowRight") {
+        play(false);
+    }
+};
 
-function stats() {
-    console.log(`Card distrubution: ${currentCardDistribution}`)
-    console.log(`Repetition pattern: ${repititionPattern}`)
-    console.log(`Repition lenght: ${repititionLength}`)
-    console.log(`Number of cycles: ${numberOfCycles}`)
-    console.log(`Score: ${score}`)
-    console.log(`Card distrubution history: ${cardDistributionHistory}`)
+//Function to play game cycles
+function play(autoplay) {
+    //Autoplay does max 25 cycles
+    if (autoplay == true) {
+        for (let i = 0; i <= 25; i++) {
+            if (calculateNextStackArray() == "stop") {
+                break;
+            }
+        }
+    //Else do one game cycle
+    } else {
+        calculateNextStackArray();
+    }
 }

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,11 +10,10 @@
 </head>
 <body>
     <div class="inputDiv">
-        <input type="input" placeholder="1-20, 1-20, 1-20..." autocomplete="off" id="carddistrubution" oninput="getVal(true)"/>
-        <button onclick="getVal(false)" id="button" class="submit-button">Submit</button>
+        <input type="input" placeholder="1-20, 1-20, 1-20..." autocomplete="off" id="carddistrubution" oninput="getValues(true)"/>
+        <button onclick="getValues(false)" id="button" class="submit-button">Submit</button>
         <button onclick="clearBoard()" id="button" class="clear-button">Clear</button>
-        <button onclick="stats()" id="button" class="stats-button">Stats</button>
-        <button onclick="play()" id="button" class="play-button">Play</button>
+        <button onclick="play(true)" id="button" class="play-button">Simulate</button>
     </div>
     <div>
         <p id="text"></p>
